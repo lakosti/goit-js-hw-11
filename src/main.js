@@ -27,6 +27,7 @@ function handleSearch(evt) {
   const form = evt.currentTarget;
   const searchWord = form.elements.search.value;
 
+  refs.list.innerHTML = '';
   refs.loader.style.display = 'block';
 
   searchPhotoByName(searchWord)
@@ -38,9 +39,9 @@ function handleSearch(evt) {
           message:
             'Sorry, there are no images matching your search query. Please try again!',
         });
-        refs.list.innerHTML = '';
         return;
       }
+
       refs.list.innerHTML = createMarkup(arr);
       simplelightbox.refresh();
     })
@@ -64,6 +65,7 @@ function searchPhotoByName(searchWord) {
     orientation: 'horizontal',
     safesearch: true,
   });
+
   return fetch(`${BASE_URL}?${urlParams}`).then(resp => {
     if (!resp.ok) {
       throw new Error(resp.statusText);
