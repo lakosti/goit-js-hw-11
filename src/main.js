@@ -4,18 +4,6 @@ import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-/**
- * 1. дістаємо всі елементи з дому
- * 2. формуємо юрл (ключ + рекваед параметри + це все в об'єкт)
- * 3. перевіряємо через постман
- * 4. пишемо фетч і перевіряємо на помилку і парсимо
- * 5. у місці виклику функції обробляємо зенами і кетчами
- * 6. робимо функцію для розмітки
- * 7. додаємо бібліотеки
- * 8. додаємо стилі
- * 9. робимо лоудер
- */
-
 const BASE_URL = 'https://pixabay.com/api/';
 const API_KEY = '42030111-51447223cbabab8b20d1b63f9';
 
@@ -27,16 +15,45 @@ const refs = {
 
 refs.form.addEventListener('submit', handleSearch);
 
+const simplelightbox = new SimpleLightbox('.gallery a', {
+  captions: true,
+  captionsData: 'alt',
+  captionDelay: 250,
+});
+
 function handleSearch(evt) {
   evt.preventDefault();
+
   const form = evt.currentTarget;
   const searchWord = form.elements.search.value;
-  console.log(searchWord);
+
+  refs.loader.style.display = 'block';
 
   searchPhotoByName(searchWord)
-    .then(data => console.log(data))
-    .catch(err => console.log(err))
-    .finally(() => form.reset());
+    .then(data => {
+      const arr = data.hits;
+      if (!searchWord || !arr.length) {
+        iziToast.error({
+          title: 'Error',
+          message:
+            'Sorry, there are no images matching your search query. Please try again!',
+        });
+        refs.list.innerHTML = '';
+        return;
+      }
+      refs.list.innerHTML = createMarkup(arr);
+      simplelightbox.refresh();
+    })
+    .catch(err => {
+      iziToast.error({
+        title: 'Error',
+        message: `${err}`,
+      });
+    })
+    .finally(() => {
+      form.reset();
+      refs.loader.style.display = 'none';
+    });
 }
 
 function searchPhotoByName(searchWord) {
@@ -55,6 +72,45 @@ function searchPhotoByName(searchWord) {
   });
 }
 
-// function createMarkup({}) {
-//   //
-// }
+function createMarkup(arr) {
+  return arr
+    .map(
+      ({
+        webformatURL,
+        largeImageURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) => `<li class="gallery-item">
+          <a class="gallery-link" href="${largeImageURL}">
+            <img
+              class="gallery-img"
+              src="${webformatURL}"
+              alt="${tags}"
+
+            />
+          </a>
+          <div class="wrapper">
+            <div class="wrap">
+              <h2 class="header">Likes</h2>
+              <p class="numbers">${likes}</p>
+            </div>
+            <div class="wrap">
+              <h2 class="header">Views</h2>
+              <p class="numbers">${views}</p>
+            </div>
+            <div class="wrap">
+              <h2 class="header">Comments</h2>
+              <p class="numbers">${comments}</p>
+            </div>
+            <div class="wrap">
+              <h2 class="header">Downloads</h2>
+              <p class="numbers">${downloads}</p>
+            </div>
+          </div>
+        </li>`
+    )
+    .join('');
+}
