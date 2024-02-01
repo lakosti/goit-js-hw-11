@@ -34,12 +34,11 @@ function handleSearch(evt) {
   if (!searchWord) {
     iziToast.error({
       title: 'Error',
-      message: 'Please write something in the search',
+      message: 'Please enter something in the search',
     });
     refs.loader.style.display = 'none';
     return;
   }
-
   searchPhotoByName(searchWord)
     .then(data => {
       const arr = data.hits;
