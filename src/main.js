@@ -14,6 +14,7 @@ const refs = {
 };
 
 refs.form.addEventListener('submit', handleSearch);
+refs.loader.style.display = 'none';
 
 const simplelightbox = new SimpleLightbox('.gallery a', {
   captions: true,
@@ -27,13 +28,22 @@ function handleSearch(evt) {
   const form = evt.currentTarget;
   const searchWord = form.elements.search.value;
 
-  refs.list.innerHTML = '';
   refs.loader.style.display = 'block';
+  refs.list.innerHTML = '';
+
+  if (!searchWord) {
+    iziToast.error({
+      title: 'Error',
+      message: 'Please write something in the search',
+    });
+    refs.loader.style.display = 'none';
+    return;
+  }
 
   searchPhotoByName(searchWord)
     .then(data => {
       const arr = data.hits;
-      if (!searchWord || !arr.length) {
+      if (!arr.length) {
         iziToast.error({
           title: 'Error',
           message:
