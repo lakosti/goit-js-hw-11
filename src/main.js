@@ -26,7 +26,7 @@ function handleSearch(evt) {
   evt.preventDefault();
 
   const form = evt.currentTarget;
-  const searchWord = form.elements.search.value;
+  const searchWord = form.elements.search.value.trim();
 
   refs.loader.style.display = 'block';
   refs.list.innerHTML = '';
